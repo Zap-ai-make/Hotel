@@ -4,5 +4,8 @@
  * Ajouter ici les types UI et session personnalises.
  */
 
-/** Roles utilisateurs du systeme */
+// Re-export du type Role depuis Prisma generated
+export { Role } from "../../generated/prisma";
+
+/** Alias pour compatibilite avec le code existant */
 export type UserRole = "RECEPTIONNISTE" | "MANAGER" | "ADMIN";
