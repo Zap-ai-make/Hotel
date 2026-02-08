@@ -1,10 +1,12 @@
+import bcrypt from "bcrypt";
 import type { DefaultSession, NextAuthConfig } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+
+import { db } from "~/server/db";
 import type { Role } from "~/types";
 
 /**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- *
+ * Module augmentation for `next-auth` types.
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 declare module "next-auth" {
@@ -21,14 +23,61 @@ declare module "next-auth" {
 }
 
 /**
- * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- * Note: Credentials provider sera configure dans Story 1.3
- *
+ * Options for NextAuth.js - Credentials provider (email + password)
  * @see https://next-auth.js.org/configuration/options
  */
 export const authConfig = {
-	providers: [],
+	providers: [
+		CredentialsProvider({
+			name: "credentials",
+			credentials: {
+				email: { label: "Email", type: "email" },
+				password: { label: "Mot de passe", type: "password" },
+			},
+			async authorize(credentials) {
+				if (!credentials?.email || !credentials?.password) return null;
+
+				const user = await db.user.findUnique({
+					where: { email: credentials.email as string },
+				});
+				if (!user) return null;
+
+				const isValid = await bcrypt.compare(
+					credentials.password as string,
+					user.password,
+				);
+				if (!isValid) return null;
+
+				return {
+					id: user.id,
+					email: user.email,
+					name: user.nom,
+					role: user.role,
+				};
+			},
+		}),
+	],
+	session: {
+		strategy: "jwt",
+		maxAge: 28800, // 8 heures (NFR7)
+	},
+	pages: {
+		signIn: "/login",
+	},
 	callbacks: {
-		session: ({ session }) => session,
+		jwt({ token, user }) {
+			if (user) {
+				token.id = user.id;
+				token.role = (user as { role: Role }).role;
+			}
+			return token;
+		},
+		session({ session, token }) {
+			if (session.user) {
+				session.user.id = token.id as string;
+				session.user.role = token.role as Role;
+			}
+			return session;
+		},
 	},
 } satisfies NextAuthConfig;
