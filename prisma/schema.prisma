@@ -29,3 +29,27 @@ model User {
 
     @@index([email])
 }
+
+enum TypeChambre {
+    SIMPLE
+    DOUBLE
+    SUITE
+}
+
+enum StatutChambre {
+    LIBRE
+    OCCUPE
+}
+
+model Chambre {
+    id               String        @id @default(cuid())
+    numero           String        @unique
+    type             TypeChambre
+    tarif            Decimal
+    statut           StatutChambre  @default(LIBRE)
+    caracteristiques String[]
+    createdAt        DateTime      @default(now())
+    updatedAt        DateTime      @updatedAt
+
+    @@index([numero])
+}

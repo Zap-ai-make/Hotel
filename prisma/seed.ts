@@ -17,7 +17,39 @@ async function main() {
 		},
 	});
 
-	console.log(`Seed termine: ${admin.email} cree (role: ${admin.role})`);
+	console.log(`Seed: ${admin.email} cree (role: ${admin.role})`);
+
+	// Chambres de l'hotel
+	const chambres = [
+		{ numero: "101", type: "SIMPLE" as const, tarif: 25000, caracteristiques: ["Climatisation", "TV", "WiFi"] },
+		{ numero: "102", type: "SIMPLE" as const, tarif: 25000, caracteristiques: ["Climatisation", "TV", "WiFi"] },
+		{ numero: "103", type: "SIMPLE" as const, tarif: 28000, caracteristiques: ["Climatisation", "TV", "WiFi", "Coffre-fort"] },
+		{ numero: "104", type: "SIMPLE" as const, tarif: 28000, caracteristiques: ["Climatisation", "TV", "WiFi", "Vue jardin"] },
+		{ numero: "201", type: "DOUBLE" as const, tarif: 40000, caracteristiques: ["Climatisation", "TV", "WiFi", "Minibar"] },
+		{ numero: "202", type: "DOUBLE" as const, tarif: 40000, caracteristiques: ["Climatisation", "TV", "WiFi", "Minibar"] },
+		{ numero: "203", type: "DOUBLE" as const, tarif: 45000, caracteristiques: ["Climatisation", "TV", "WiFi", "Minibar", "Balcon"] },
+		{ numero: "204", type: "DOUBLE" as const, tarif: 45000, caracteristiques: ["Climatisation", "TV", "WiFi", "Minibar", "Vue ville"] },
+		{ numero: "301", type: "SUITE" as const, tarif: 65000, caracteristiques: ["Climatisation", "TV", "WiFi", "Minibar", "Balcon", "Coffre-fort"] },
+		{ numero: "302", type: "SUITE" as const, tarif: 65000, caracteristiques: ["Climatisation", "TV", "WiFi", "Minibar", "Balcon", "Vue ville"] },
+		{ numero: "303", type: "SUITE" as const, tarif: 75000, caracteristiques: ["Climatisation", "TV", "WiFi", "Minibar", "Balcon", "Coffre-fort", "Vue jardin"] },
+		{ numero: "304", type: "SUITE" as const, tarif: 75000, caracteristiques: ["Climatisation", "TV", "WiFi", "Minibar", "Balcon", "Coffre-fort", "Vue ville", "Baignoire"] },
+	];
+
+	for (const chambre of chambres) {
+		await prisma.chambre.upsert({
+			where: { numero: chambre.numero },
+			update: {},
+			create: {
+				numero: chambre.numero,
+				type: chambre.type,
+				tarif: chambre.tarif,
+				statut: "LIBRE",
+				caracteristiques: chambre.caracteristiques,
+			},
+		});
+	}
+
+	console.log(`Seed: ${chambres.length} chambres creees`);
 }
 
 main()
