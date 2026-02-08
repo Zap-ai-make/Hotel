@@ -22,7 +22,7 @@ export default async function DashboardLayout({
 
 	return (
 		<div className="min-h-screen">
-			<Sidebar userName={userName} userRole={userRole} />
+			<Sidebar userName={userName} userRole={userRole} isAdmin={session.user.role === "ADMIN"} />
 			<main className="ml-60 min-h-screen p-6">{children}</main>
 		</div>
 	);

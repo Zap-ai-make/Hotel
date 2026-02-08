@@ -40,7 +40,7 @@ export const authConfig = {
 				const user = await db.user.findUnique({
 					where: { email: credentials.email as string },
 				});
-				if (!user) return null;
+				if (!user || !user.active) return null;
 
 				const isValid = await bcrypt.compare(
 					credentials.password as string,

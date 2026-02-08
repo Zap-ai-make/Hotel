@@ -6,6 +6,7 @@ import {
 	CreditCard,
 	LayoutDashboard,
 	LogOut,
+	UserCog,
 	Users,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -23,12 +24,17 @@ const navItems = [
 	{ href: "/paiements", label: "Paiements", icon: CreditCard },
 ];
 
+const adminNavItems = [
+	{ href: "/utilisateurs", label: "Utilisateurs", icon: UserCog },
+];
+
 interface SidebarProps {
 	userName: string;
 	userRole: string;
+	isAdmin?: boolean;
 }
 
-export function Sidebar({ userName, userRole }: SidebarProps) {
+export function Sidebar({ userName, userRole, isAdmin }: SidebarProps) {
 	const pathname = usePathname();
 
 	return (
@@ -59,6 +65,25 @@ export function Sidebar({ userName, userRole }: SidebarProps) {
 						</Link>
 					);
 				})}
+				{isAdmin &&
+					adminNavItems.map((item) => {
+						const isActive = pathname.startsWith(item.href);
+						return (
+							<Link
+								key={item.href}
+								href={item.href}
+								className={cn(
+									"flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+									isActive
+										? "bg-primary/10 text-primary"
+										: "text-muted-foreground hover:bg-muted hover:text-foreground",
+								)}
+							>
+								<item.icon className="size-5" />
+								{item.label}
+							</Link>
+						);
+					})}
 			</nav>
 
 			<div className="border-t p-4">

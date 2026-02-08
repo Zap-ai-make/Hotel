@@ -131,3 +131,13 @@ export const protectedProcedure = t.procedure
 			},
 		});
 	});
+
+/**
+ * Admin procedure - only accessible to users with ADMIN role
+ */
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+	if (ctx.session.user.role !== "ADMIN") {
+		throw new TRPCError({ code: "FORBIDDEN" });
+	}
+	return next({ ctx });
+});
