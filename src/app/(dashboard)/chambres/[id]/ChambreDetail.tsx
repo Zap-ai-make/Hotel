@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRightLeft } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { toast } from "sonner";
 import { ROOM_STATUS_COLORS } from "~/lib/constants";
 import { formatMoney } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -21,7 +22,16 @@ const STATUT_LABELS: Record<string, string> = {
 };
 
 export function ChambreDetail({ id }: { id: string }) {
+	const utils = api.useUtils();
 	const { data: chambre, isLoading } = api.chambre.getById.useQuery({ id });
+	const toggleStatut = api.chambre.toggleStatut.useMutation({
+		onSuccess: (updated) => {
+			void utils.chambre.getById.invalidate({ id });
+			void utils.chambre.list.invalidate();
+			const label = updated.statut === "LIBRE" ? "Libre" : "Occupee";
+			toast.success(`Chambre ${updated.numero} → ${label}`);
+		},
+	});
 
 	if (isLoading) {
 		return <p className="text-muted-foreground">Chargement...</p>;
@@ -99,7 +109,20 @@ export function ChambreDetail({ id }: { id: string }) {
 						</div>
 					)}
 				</CardContent>
-			</Card>
+
+				<div className="flex justify-end px-6 pb-2">
+					<Button
+						variant={chambre.statut === "LIBRE" ? "destructive" : "default"}
+						onClick={() => toggleStatut.mutate({ id: chambre.id })}
+						disabled={toggleStatut.isPending}
+					>
+						<ArrowRightLeft className="mr-2 h-4 w-4" />
+						{chambre.statut === "LIBRE"
+							? "Marquer Occupee"
+							: "Marquer Libre"}
+					</Button>
+				</div>
+				</Card>
 		</div>
 	);
 }

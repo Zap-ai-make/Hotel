@@ -23,4 +23,23 @@ export const chambreRouter = createTRPCRouter({
 			}
 			return chambre;
 		}),
+
+	toggleStatut: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const chambre = await ctx.db.chambre.findUnique({
+				where: { id: input.id },
+			});
+			if (!chambre) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Chambre introuvable",
+				});
+			}
+			const nouveauStatut = chambre.statut === "LIBRE" ? "OCCUPE" : "LIBRE";
+			return ctx.db.chambre.update({
+				where: { id: input.id },
+				data: { statut: nouveauStatut },
+			});
+		}),
 });
