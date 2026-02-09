@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { ROOM_STATUS_COLORS } from "~/lib/constants";
@@ -32,7 +33,8 @@ export function ChambreCard({ chambre }: ChambreCardProps) {
 	const tarifNumber = Number(chambre.tarif);
 
 	return (
-		<Card className="gap-3 py-4">
+		<Link href={`/chambres/${chambre.id}`}>
+		<Card className="gap-3 py-4 transition-shadow hover:shadow-md cursor-pointer">
 			<CardHeader className="flex-row items-center justify-between gap-2 pb-0">
 				<CardTitle className="text-xl">{chambre.numero}</CardTitle>
 				<Badge variant="outline" className={statutColor}>
@@ -64,5 +66,6 @@ export function ChambreCard({ chambre }: ChambreCardProps) {
 				)}
 			</CardContent>
 		</Card>
+		</Link>
 	);
 }
