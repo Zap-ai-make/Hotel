@@ -6,6 +6,7 @@ import {
 	CreditCard,
 	LayoutDashboard,
 	LogOut,
+	Settings,
 	UserCog,
 	Users,
 } from "lucide-react";
@@ -26,6 +27,7 @@ const navItems = [
 
 const adminNavItems = [
 	{ href: "/utilisateurs", label: "Utilisateurs", icon: UserCog },
+	{ href: "/chambres/admin", label: "Gestion Chambres", icon: Settings },
 ];
 
 interface SidebarProps {
