@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { chambreRouter } from "~/server/api/routers/chambre";
+import { reservationRouter } from "~/server/api/routers/reservation";
 import { userRouter } from "~/server/api/routers/user";
 
 /**
@@ -9,6 +10,7 @@ import { userRouter } from "~/server/api/routers/user";
  */
 export const appRouter = createTRPCRouter({
 	chambre: chambreRouter,
+	reservation: reservationRouter,
 	user: userRouter,
 });
 

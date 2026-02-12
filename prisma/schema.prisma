@@ -18,14 +18,15 @@ enum Role {
 }
 
 model User {
-    id        String   @id @default(cuid())
-    email     String   @unique
-    nom       String
-    password  String
-    role      Role     @default(RECEPTIONNISTE)
-    active    Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id           String        @id @default(cuid())
+    email        String        @unique
+    nom          String
+    password     String
+    role         Role          @default(RECEPTIONNISTE)
+    active       Boolean       @default(true)
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    reservations Reservation[]
 
     @@index([email])
 }
@@ -50,6 +51,37 @@ model Chambre {
     caracteristiques String[]
     createdAt        DateTime      @default(now())
     updatedAt        DateTime      @updatedAt
+    reservations     Reservation[]
 
     @@index([numero])
+}
+
+enum StatutReservation {
+    CONFIRMEE
+    EN_COURS
+    TERMINEE
+    ANNULEE
+}
+
+model Reservation {
+    id              String             @id @default(cuid())
+    clientNom       String
+    clientTelephone String
+    chambreId       String
+    chambre         Chambre            @relation(fields: [chambreId], references: [id])
+    dateArrivee     DateTime
+    dateDepart      DateTime
+    prixTotal       Decimal
+    statut          StatutReservation  @default(CONFIRMEE)
+    notes           String?
+    createdAt       DateTime           @default(now())
+    updatedAt       DateTime           @updatedAt
+    createdById     String
+    createdBy       User               @relation(fields: [createdById], references: [id])
+
+    @@index([chambreId])
+    @@index([createdById])
+    @@index([dateArrivee])
+    @@index([dateDepart])
+    @@index([statut])
 }

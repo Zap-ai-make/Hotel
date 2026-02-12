@@ -19,3 +19,26 @@ export const ROOM_STATUS_COLORS = {
 	LIBRE: "text-green-600 bg-green-50",
 	OCCUPE: "text-red-600 bg-red-50",
 } as const;
+
+/** Labels francais des statuts reservation */
+export const STATUT_RESERVATION_LABELS: Record<string, string> = {
+	CONFIRMEE: "Confirmee",
+	EN_COURS: "En cours",
+	TERMINEE: "Terminee",
+	ANNULEE: "Annulee",
+};
+
+/** Labels francais des types de chambre */
+export const TYPE_CHAMBRE_LABELS: Record<string, string> = {
+	SIMPLE: "Simple",
+	DOUBLE: "Double",
+	SUITE: "Suite",
+};
+
+/** Couleurs des statuts reservation */
+export const RESERVATION_STATUS_COLORS: Record<string, string> = {
+	CONFIRMEE: "text-blue-600 bg-blue-50",
+	EN_COURS: "text-green-600 bg-green-50",
+	TERMINEE: "text-gray-600 bg-gray-50",
+	ANNULEE: "text-red-600 bg-red-50",
+};
