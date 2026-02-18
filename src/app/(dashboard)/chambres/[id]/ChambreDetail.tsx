@@ -2,19 +2,13 @@
 
 import { ArrowLeft, ArrowRightLeft } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { toast } from "sonner";
-import { ROOM_STATUS_COLORS } from "~/lib/constants";
+import { ROOM_STATUS_COLORS, TYPE_CHAMBRE_LABELS } from "~/lib/constants";
 import { formatMoney } from "~/lib/utils";
 import { api } from "~/trpc/react";
-
-const TYPE_LABELS: Record<string, string> = {
-	SIMPLE: "Simple",
-	DOUBLE: "Double",
-	SUITE: "Suite",
-};
 
 const STATUT_LABELS: Record<string, string> = {
 	LIBRE: "Libre",
@@ -41,7 +35,7 @@ export function ChambreDetail({ id }: { id: string }) {
 		return (
 			<div className="space-y-4">
 				<p className="text-muted-foreground">Chambre introuvable.</p>
-				<Button variant="outline" asChild>
+				<Button asChild variant="outline">
 					<Link href="/chambres">
 						<ArrowLeft className="mr-2 h-4 w-4" />
 						Retour a la liste
@@ -56,7 +50,7 @@ export function ChambreDetail({ id }: { id: string }) {
 
 	return (
 		<div className="space-y-6">
-			<Button variant="outline" asChild>
+			<Button asChild variant="outline">
 				<Link href="/chambres">
 					<ArrowLeft className="mr-2 h-4 w-4" />
 					Retour a la liste
@@ -66,25 +60,26 @@ export function ChambreDetail({ id }: { id: string }) {
 			<Card>
 				<CardHeader className="flex-row items-center justify-between gap-4">
 					<div>
-						<CardTitle className="text-3xl">
-							Chambre {chambre.numero}
-						</CardTitle>
+						<CardTitle className="text-3xl">Chambre {chambre.numero}</CardTitle>
 						<p className="mt-1 text-muted-foreground">
-							{TYPE_LABELS[chambre.type] ?? chambre.type}
+							{TYPE_CHAMBRE_LABELS[chambre.type] ?? chambre.type}
 						</p>
 					</div>
-					<Badge variant="outline" className={`${statutColor} text-sm px-3 py-1`}>
+					<Badge
+						className={`${statutColor} px-3 py-1 text-sm`}
+						variant="outline"
+					>
 						{STATUT_LABELS[chambre.statut] ?? chambre.statut}
 					</Badge>
 				</CardHeader>
 				<CardContent className="space-y-6">
 					<div>
-						<h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+						<h3 className="font-semibold text-muted-foreground text-sm uppercase tracking-wide">
 							Tarif
 						</h3>
-						<p className="mt-1 text-2xl font-bold">
+						<p className="mt-1 font-bold text-2xl">
 							{formatMoney(tarifNumber)}
-							<span className="font-normal text-muted-foreground text-base">
+							<span className="font-normal text-base text-muted-foreground">
 								{" "}
 								/ nuit
 							</span>
@@ -93,14 +88,14 @@ export function ChambreDetail({ id }: { id: string }) {
 
 					{chambre.caracteristiques.length > 0 && (
 						<div>
-							<h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+							<h3 className="font-semibold text-muted-foreground text-sm uppercase tracking-wide">
 								Caracteristiques
 							</h3>
 							<div className="mt-2 flex flex-wrap gap-2">
 								{chambre.caracteristiques.map((c) => (
 									<span
-										key={c}
 										className="rounded-md bg-muted px-3 py-1.5 text-sm"
+										key={c}
 									>
 										{c}
 									</span>
@@ -112,17 +107,15 @@ export function ChambreDetail({ id }: { id: string }) {
 
 				<div className="flex justify-end px-6 pb-2">
 					<Button
-						variant={chambre.statut === "LIBRE" ? "destructive" : "default"}
-						onClick={() => toggleStatut.mutate({ id: chambre.id })}
 						disabled={toggleStatut.isPending}
+						onClick={() => toggleStatut.mutate({ id: chambre.id })}
+						variant={chambre.statut === "LIBRE" ? "destructive" : "default"}
 					>
 						<ArrowRightLeft className="mr-2 h-4 w-4" />
-						{chambre.statut === "LIBRE"
-							? "Marquer Occupee"
-							: "Marquer Libre"}
+						{chambre.statut === "LIBRE" ? "Marquer Occupee" : "Marquer Libre"}
 					</Button>
 				</div>
-				</Card>
+			</Card>
 		</div>
 	);
 }

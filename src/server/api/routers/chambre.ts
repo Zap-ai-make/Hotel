@@ -5,6 +5,7 @@ import {
 	createTRPCRouter,
 	protectedProcedure,
 } from "~/server/api/trpc";
+import { logAction } from "./audit";
 
 const createChambreSchema = z.object({
 	numero: z.string().min(1, "Le numero est requis"),
@@ -56,10 +57,20 @@ export const chambreRouter = createTRPCRouter({
 				});
 			}
 			const nouveauStatut = chambre.statut === "LIBRE" ? "OCCUPE" : "LIBRE";
-			return ctx.db.chambre.update({
+			const updated = await ctx.db.chambre.update({
 				where: { id: input.id },
 				data: { statut: nouveauStatut },
 			});
+
+			await logAction(ctx.db, {
+				userId: ctx.session.user.id,
+				action: "MODIFICATION",
+				entite: "Chambre",
+				entiteId: input.id,
+				details: { numero: chambre.numero, statut: nouveauStatut },
+			});
+
+			return updated;
 		}),
 
 	create: adminProcedure
@@ -74,7 +85,7 @@ export const chambreRouter = createTRPCRouter({
 					message: `Le numero ${input.numero} existe deja`,
 				});
 			}
-			return ctx.db.chambre.create({
+			const created = await ctx.db.chambre.create({
 				data: {
 					numero: input.numero,
 					type: input.type,
@@ -82,6 +93,16 @@ export const chambreRouter = createTRPCRouter({
 					caracteristiques: input.caracteristiques,
 				},
 			});
+
+			await logAction(ctx.db, {
+				userId: ctx.session.user.id,
+				action: "CREATION",
+				entite: "Chambre",
+				entiteId: created.id,
+				details: { numero: input.numero, type: input.type },
+			});
+
+			return created;
 		}),
 
 	update: adminProcedure
@@ -96,7 +117,7 @@ export const chambreRouter = createTRPCRouter({
 					message: `Le numero ${input.numero} existe deja`,
 				});
 			}
-			return ctx.db.chambre.update({
+			const updated = await ctx.db.chambre.update({
 				where: { id: input.id },
 				data: {
 					numero: input.numero,
@@ -105,6 +126,16 @@ export const chambreRouter = createTRPCRouter({
 					caracteristiques: input.caracteristiques,
 				},
 			});
+
+			await logAction(ctx.db, {
+				userId: ctx.session.user.id,
+				action: "MODIFICATION",
+				entite: "Chambre",
+				entiteId: input.id,
+				details: { numero: input.numero, type: input.type },
+			});
+
+			return updated;
 		}),
 
 	delete: adminProcedure
@@ -119,6 +150,31 @@ export const chambreRouter = createTRPCRouter({
 					message: "Chambre introuvable",
 				});
 			}
-			return ctx.db.chambre.delete({ where: { id: input.id } });
+
+			// H5: Verifier qu'il n'y a pas de reservations actives
+			const activeReservations = await ctx.db.reservation.count({
+				where: {
+					chambreId: input.id,
+					statut: { in: ["CONFIRMEE", "EN_COURS"] },
+				},
+			});
+			if (activeReservations > 0) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: `Impossible de supprimer: ${activeReservations} reservation(s) active(s) sur cette chambre`,
+				});
+			}
+
+			const deleted = await ctx.db.chambre.delete({ where: { id: input.id } });
+
+			await logAction(ctx.db, {
+				userId: ctx.session.user.id,
+				action: "SUPPRESSION",
+				entite: "Chambre",
+				entiteId: input.id,
+				details: { numero: chambre.numero },
+			});
+
+			return deleted;
 		}),
 });

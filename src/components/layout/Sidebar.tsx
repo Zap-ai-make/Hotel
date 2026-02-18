@@ -6,16 +6,16 @@ import {
 	CreditCard,
 	LayoutDashboard,
 	LogOut,
+	ScrollText,
 	Settings,
 	UserCog,
 	Users,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-import { cn } from "~/lib/utils";
+import { signOut } from "next-auth/react";
 import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 const navItems = [
 	{ href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -28,6 +28,7 @@ const navItems = [
 const adminNavItems = [
 	{ href: "/utilisateurs", label: "Utilisateurs", icon: UserCog },
 	{ href: "/chambres/admin", label: "Gestion Chambres", icon: Settings },
+	{ href: "/audit", label: "Journal d'audit", icon: ScrollText },
 ];
 
 interface SidebarProps {
@@ -40,7 +41,7 @@ export function Sidebar({ userName, userRole, isAdmin }: SidebarProps) {
 	const pathname = usePathname();
 
 	return (
-		<aside className="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col border-r bg-card">
+		<aside className="fixed top-0 left-0 z-40 flex h-screen w-60 flex-col border-r bg-card">
 			<div className="flex h-16 items-center border-b px-6">
 				<h1 className="font-bold text-lg">Hotel Management</h1>
 			</div>
@@ -53,14 +54,14 @@ export function Sidebar({ userName, userRole, isAdmin }: SidebarProps) {
 							: pathname.startsWith(item.href);
 					return (
 						<Link
-							key={item.href}
-							href={item.href}
 							className={cn(
-								"flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+								"flex items-center gap-3 rounded-md px-3 py-2.5 font-medium text-sm transition-colors",
 								isActive
 									? "bg-primary/10 text-primary"
 									: "text-muted-foreground hover:bg-muted hover:text-foreground",
 							)}
+							href={item.href}
+							key={item.href}
 						>
 							<item.icon className="size-5" />
 							{item.label}
@@ -72,14 +73,14 @@ export function Sidebar({ userName, userRole, isAdmin }: SidebarProps) {
 						const isActive = pathname.startsWith(item.href);
 						return (
 							<Link
-								key={item.href}
-								href={item.href}
 								className={cn(
-									"flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+									"flex items-center gap-3 rounded-md px-3 py-2.5 font-medium text-sm transition-colors",
 									isActive
 										? "bg-primary/10 text-primary"
 										: "text-muted-foreground hover:bg-muted hover:text-foreground",
 								)}
+								href={item.href}
+								key={item.href}
 							>
 								<item.icon className="size-5" />
 								{item.label}
@@ -94,9 +95,9 @@ export function Sidebar({ userName, userRole, isAdmin }: SidebarProps) {
 					<p className="text-muted-foreground text-xs">{userRole}</p>
 				</div>
 				<Button
-					variant="ghost"
 					className="w-full justify-start gap-3 text-muted-foreground"
 					onClick={() => signOut({ callbackUrl: "/login" })}
+					variant="ghost"
 				>
 					<LogOut className="size-4" />
 					Deconnexion

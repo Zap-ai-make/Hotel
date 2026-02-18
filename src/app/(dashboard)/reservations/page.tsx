@@ -1,14 +1,6 @@
-import { auth } from "~/server/auth";
-import { redirect } from "next/navigation";
-import { CalendrierView } from "./CalendrierView";
+import { ReservationsPageClient } from "./ReservationsPageClient";
 
-export default async function ReservationsPage() {
-	const session = await auth();
-
-	if (!session?.user) {
-		redirect("/login");
-	}
-
+export default function ReservationsPage() {
 	return (
 		<div>
 			<h1 className="font-bold text-2xl">Reservations</h1>
@@ -16,7 +8,7 @@ export default async function ReservationsPage() {
 				Calendrier des disponibilites et gestion des reservations
 			</p>
 			<div className="mt-6">
-				<CalendrierView />
+				<ReservationsPageClient />
 			</div>
 		</div>
 	);

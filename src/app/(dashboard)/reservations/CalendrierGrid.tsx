@@ -11,6 +11,7 @@ import {
 } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
@@ -18,10 +19,7 @@ import { api } from "~/trpc/react";
 
 const JOURS_SEMAINE = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
-function getDisponibiliteColor(
-	chambresLibres: number,
-	total: number,
-): string {
+function getDisponibiliteColor(chambresLibres: number, total: number): string {
 	if (chambresLibres === 0) return "bg-red-100 text-red-700";
 	if (chambresLibres <= total * 0.3) return "bg-orange-100 text-orange-700";
 	return "bg-green-100 text-green-700";
@@ -42,21 +40,30 @@ export function CalendrierGrid({
 	onNaviguer,
 	onDateClick,
 }: CalendrierGridProps) {
-	const { data, isLoading } = api.reservation.getDisponibilitesMensuelles.useQuery(
-		{ mois, annee },
-	);
+	const { data, isLoading } =
+		api.reservation.getDisponibilitesMensuelles.useQuery({ mois, annee });
 
 	const debut = startOfMonth(new Date(annee, mois - 1));
 	const fin = endOfMonth(debut);
-	const joursCalendrier = eachDayOfInterval({ start: debut, end: fin });
+	const joursCalendrier = useMemo(
+		() => eachDayOfInterval({ start: debut, end: fin }),
+		[debut.getTime(), fin.getTime()],
+	);
 	const aujourdHui = startOfDay(new Date());
 
 	// Monday = 0 offset: (getDay returns 0=Sun, we want 0=Mon)
 	const premierJourOffset = (getDay(debut) + 6) % 7;
 
 	// Build a map date ISO -> disponibilite for quick lookup
-	const dispoMap = new Map(
-		data?.jours.map((j) => [startOfDay(new Date(j.date)).toISOString(), j]),
+	const dispoMap = useMemo(
+		() =>
+			new Map(
+				data?.jours.map((j) => [
+					startOfDay(new Date(j.date)).toISOString(),
+					j,
+				]),
+			),
+		[data],
 	);
 
 	const moisLabel = format(debut, "MMMM yyyy", { locale: fr });
@@ -68,30 +75,30 @@ export function CalendrierGrid({
 		<Card>
 			<CardHeader className="flex-row items-center justify-between pb-4">
 				<Button
-					variant="outline"
-					size="icon"
-					onClick={() => onNaviguer(-1)}
 					aria-label="Mois precedent"
+					onClick={() => onNaviguer(-1)}
+					size="icon"
+					variant="outline"
 				>
 					<ChevronLeft className="size-4" />
 				</Button>
 				<CardTitle className="text-lg">{moisLabelCapitalized}</CardTitle>
 				<Button
-					variant="outline"
-					size="icon"
-					onClick={() => onNaviguer(1)}
 					aria-label="Mois suivant"
+					onClick={() => onNaviguer(1)}
+					size="icon"
+					variant="outline"
 				>
 					<ChevronRight className="size-4" />
 				</Button>
 			</CardHeader>
 			<CardContent>
 				{/* Header jours de la semaine */}
-				<div className="grid grid-cols-7 gap-1 mb-1">
+				<div className="mb-1 grid grid-cols-7 gap-1">
 					{JOURS_SEMAINE.map((jour) => (
 						<div
-							key={jour}
 							className="py-2 text-center font-medium text-muted-foreground text-xs"
+							key={jour}
 						>
 							{jour}
 						</div>
@@ -106,7 +113,7 @@ export function CalendrierGrid({
 					<div className="grid grid-cols-7 gap-1">
 						{/* Empty cells before the first day */}
 						{Array.from({ length: premierJourOffset }).map((_, i) => (
-							<div key={`vide-${i}`} className="aspect-square" />
+							<div className="aspect-square" key={`vide-${i}`} />
 						))}
 
 						{/* Calendar days */}
@@ -120,17 +127,19 @@ export function CalendrierGrid({
 
 							return (
 								<button
-									key={jourISO}
-									type="button"
-									disabled={estPasse}
-									onClick={() => onDateClick(jourISO)}
 									className={cn(
 										"flex aspect-square flex-col items-center justify-center rounded-md border text-sm transition-colors",
-										estPasse && "cursor-not-allowed border-transparent bg-muted/50 text-muted-foreground/50",
+										estPasse &&
+											"cursor-not-allowed border-transparent bg-muted/50 text-muted-foreground/50",
 										!estPasse && "cursor-pointer hover:border-primary/50",
-										!estPasse && getDisponibiliteColor(chambresLibres, totalChambres),
+										!estPasse &&
+											getDisponibiliteColor(chambresLibres, totalChambres),
 										estSelectionne && "ring-2 ring-primary ring-offset-1",
 									)}
+									disabled={estPasse}
+									key={jourISO}
+									onClick={() => onDateClick(jourISO)}
+									type="button"
 								>
 									<span className="font-medium">{format(jour, "d")}</span>
 									{!estPasse && totalChambres > 0 && (

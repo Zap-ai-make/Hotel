@@ -47,9 +47,7 @@ export function ChambresDisponibles({ date }: ChambresDisponiblesProps) {
 		<>
 			<Card>
 				<CardHeader className="pb-3">
-					<CardTitle className="text-base">
-						Chambres — {dateFormatee}
-					</CardTitle>
+					<CardTitle className="text-base">Chambres — {dateFormatee}</CardTitle>
 					{chambres && (
 						<p className="text-muted-foreground text-sm">
 							{libres} libre{libres !== 1 ? "s" : ""} sur {total}
@@ -75,13 +73,11 @@ export function ChambresDisponibles({ date }: ChambresDisponiblesProps) {
 
 								return (
 									<div
-										key={chambre.id}
 										className="flex items-center justify-between rounded-md border p-3"
+										key={chambre.id}
 									>
 										<div>
-											<p className="font-medium text-sm">
-												{chambre.numero}
-											</p>
+											<p className="font-medium text-sm">{chambre.numero}</p>
 											<p className="text-muted-foreground text-xs">
 												{TYPE_CHAMBRE_LABELS[chambre.type] ?? chambre.type} —{" "}
 												{formatMoney(tarifNumber)}/nuit
@@ -95,15 +91,15 @@ export function ChambresDisponibles({ date }: ChambresDisponiblesProps) {
 										<div className="flex items-center gap-2">
 											{chambre.disponible && (
 												<Button
-													variant="ghost"
-													size="sm"
 													onClick={() => setChambreSelectionnee(chambre)}
+													size="sm"
+													variant="ghost"
 												>
 													<Plus className="size-3.5" />
 													Reserver
 												</Button>
 											)}
-											<Badge variant="outline" className={statutColor}>
+											<Badge className={statutColor} variant="outline">
 												{chambre.disponible ? "Libre" : "Occupee"}
 											</Badge>
 										</div>
@@ -116,13 +112,13 @@ export function ChambresDisponibles({ date }: ChambresDisponiblesProps) {
 			</Card>
 
 			<ReservationFormDialog
-				open={!!chambreSelectionnee}
+				chambre={chambreSelectionnee}
+				dateArrivee={date}
 				onOpenChange={(open) => {
 					if (!open) setChambreSelectionnee(null);
 				}}
-				chambre={chambreSelectionnee}
-				dateArrivee={date}
 				onSuccess={() => setChambreSelectionnee(null)}
+				open={!!chambreSelectionnee}
 			/>
 		</>
 	);

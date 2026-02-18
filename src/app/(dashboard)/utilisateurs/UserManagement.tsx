@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, Plus, UserCog } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "~/components/ui/badge";
@@ -55,7 +55,7 @@ export function UserManagement({ currentUserId }: UserManagementProps) {
 
 	const createMutation = api.user.create.useMutation({
 		onSuccess: () => {
-			utils.user.list.invalidate();
+			void utils.user.list.invalidate();
 			setCreateOpen(false);
 			toast.success("Utilisateur cree avec succes");
 		},
@@ -66,7 +66,7 @@ export function UserManagement({ currentUserId }: UserManagementProps) {
 
 	const updateRoleMutation = api.user.updateRole.useMutation({
 		onSuccess: () => {
-			utils.user.list.invalidate();
+			void utils.user.list.invalidate();
 			setEditRoleUser(null);
 			toast.success("Role modifie avec succes");
 		},
@@ -77,7 +77,7 @@ export function UserManagement({ currentUserId }: UserManagementProps) {
 
 	const toggleActiveMutation = api.user.toggleActive.useMutation({
 		onSuccess: (data) => {
-			utils.user.list.invalidate();
+			void utils.user.list.invalidate();
 			toast.success(
 				data.active ? "Utilisateur reactive" : "Utilisateur desactive",
 			);
@@ -137,8 +137,6 @@ export function UserManagement({ currentUserId }: UserManagementProps) {
 								<TableCell className="text-right">
 									<div className="flex justify-end gap-2">
 										<Button
-											variant="ghost"
-											size="sm"
 											onClick={() =>
 												setEditRoleUser({
 													id: user.id,
@@ -146,18 +144,20 @@ export function UserManagement({ currentUserId }: UserManagementProps) {
 													role: user.role,
 												})
 											}
+											size="sm"
+											variant="ghost"
 										>
 											<UserCog className="size-4" />
 											Role
 										</Button>
 										{user.id !== currentUserId && (
 											<Button
-												variant="ghost"
-												size="sm"
+												disabled={toggleActiveMutation.isPending}
 												onClick={() =>
 													toggleActiveMutation.mutate({ id: user.id })
 												}
-												disabled={toggleActiveMutation.isPending}
+												size="sm"
+												variant="ghost"
 											>
 												{user.active ? "Desactiver" : "Reactiver"}
 											</Button>
@@ -168,7 +168,10 @@ export function UserManagement({ currentUserId }: UserManagementProps) {
 						))}
 						{users?.length === 0 && (
 							<TableRow>
-								<TableCell colSpan={6} className="text-center text-muted-foreground">
+								<TableCell
+									className="text-center text-muted-foreground"
+									colSpan={6}
+								>
 									Aucun utilisateur
 								</TableCell>
 							</TableRow>
@@ -178,17 +181,17 @@ export function UserManagement({ currentUserId }: UserManagementProps) {
 			</div>
 
 			<CreateUserDialog
-				open={createOpen}
+				isPending={createMutation.isPending}
 				onOpenChange={setCreateOpen}
 				onSubmit={(data) => createMutation.mutate(data)}
-				isPending={createMutation.isPending}
+				open={createOpen}
 			/>
 
 			<EditRoleDialog
-				user={editRoleUser}
+				isPending={updateRoleMutation.isPending}
 				onOpenChange={(open) => !open && setEditRoleUser(null)}
 				onSubmit={(id, role) => updateRoleMutation.mutate({ id, role })}
-				isPending={updateRoleMutation.isPending}
+				user={editRoleUser}
 			/>
 		</>
 	);
@@ -218,8 +221,7 @@ function CreateUserDialog({
 	);
 
 	const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-	const isFormValid =
-		nom.length > 0 && isEmailValid && password.length >= 6;
+	const isFormValid = nom.length > 0 && isEmailValid && password.length >= 8;
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -232,33 +234,33 @@ function CreateUserDialog({
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
+		<Dialog onOpenChange={onOpenChange} open={open}>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Nouvel utilisateur</DialogTitle>
 				</DialogHeader>
-				<form onSubmit={handleSubmit} className="space-y-4">
+				<form className="space-y-4" onSubmit={handleSubmit}>
 					<div className="space-y-2">
 						<Label htmlFor="create-nom">Nom *</Label>
 						<Input
+							disabled={isPending}
 							id="create-nom"
-							value={nom}
 							onChange={(e) => setNom(e.target.value)}
 							placeholder="Nom complet"
-							disabled={isPending}
 							required
+							value={nom}
 						/>
 					</div>
 					<div className="space-y-2">
 						<Label htmlFor="create-email">Email *</Label>
 						<Input
+							disabled={isPending}
 							id="create-email"
-							type="email"
-							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							placeholder="email@exemple.com"
-							disabled={isPending}
 							required
+							type="email"
+							value={email}
 						/>
 						{email.length > 0 && !isEmailValid && (
 							<p className="text-destructive text-sm">Format email invalide</p>
@@ -267,28 +269,28 @@ function CreateUserDialog({
 					<div className="space-y-2">
 						<Label htmlFor="create-password">Mot de passe *</Label>
 						<Input
+							disabled={isPending}
 							id="create-password"
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder="Minimum 8 caracteres"
+							required
 							type="password"
 							value={password}
-							onChange={(e) => setPassword(e.target.value)}
-							placeholder="Minimum 6 caracteres"
-							disabled={isPending}
-							required
 						/>
-						{password.length > 0 && password.length < 6 && (
+						{password.length > 0 && password.length < 8 && (
 							<p className="text-destructive text-sm">
-								Minimum 6 caracteres requis
+								Minimum 8 caracteres requis
 							</p>
 						)}
 					</div>
 					<div className="space-y-2">
 						<Label htmlFor="create-role">Role *</Label>
 						<Select
-							value={role}
+							disabled={isPending}
 							onValueChange={(v) =>
 								setRole(v as "RECEPTIONNISTE" | "MANAGER" | "ADMIN")
 							}
-							disabled={isPending}
+							value={role}
 						>
 							<SelectTrigger className="w-full">
 								<SelectValue />
@@ -302,14 +304,14 @@ function CreateUserDialog({
 					</div>
 					<DialogFooter>
 						<Button
+							disabled={isPending}
+							onClick={() => onOpenChange(false)}
 							type="button"
 							variant="outline"
-							onClick={() => onOpenChange(false)}
-							disabled={isPending}
 						>
 							Annuler
 						</Button>
-						<Button type="submit" disabled={!isFormValid || isPending}>
+						<Button disabled={!isFormValid || isPending} type="submit">
 							{isPending ? (
 								<>
 									<Loader2 className="animate-spin" />
@@ -344,14 +346,14 @@ function EditRoleDialog({
 	// Sync role when user changes
 	const currentUserId = user?.id;
 	const currentUserRole = user?.role;
-	useState(() => {
+	useEffect(() => {
 		if (currentUserRole) {
 			setRole(currentUserRole as "RECEPTIONNISTE" | "MANAGER" | "ADMIN");
 		}
-	});
+	}, [currentUserRole]);
 
 	return (
-		<Dialog open={!!user} onOpenChange={onOpenChange}>
+		<Dialog onOpenChange={onOpenChange} open={!!user}>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Modifier le role de {user?.nom}</DialogTitle>
@@ -360,11 +362,11 @@ function EditRoleDialog({
 					<div className="space-y-2">
 						<Label htmlFor="edit-role">Nouveau role</Label>
 						<Select
-							value={role}
+							disabled={isPending}
 							onValueChange={(v) =>
 								setRole(v as "RECEPTIONNISTE" | "MANAGER" | "ADMIN")
 							}
-							disabled={isPending}
+							value={role}
 						>
 							<SelectTrigger className="w-full">
 								<SelectValue />
@@ -379,15 +381,15 @@ function EditRoleDialog({
 				</div>
 				<DialogFooter>
 					<Button
-						variant="outline"
-						onClick={() => onOpenChange(false)}
 						disabled={isPending}
+						onClick={() => onOpenChange(false)}
+						variant="outline"
 					>
 						Annuler
 					</Button>
 					<Button
-						onClick={() => currentUserId && onSubmit(currentUserId, role)}
 						disabled={isPending || role === currentUserRole}
+						onClick={() => currentUserId && onSubmit(currentUserId, role)}
 					>
 						{isPending ? (
 							<>

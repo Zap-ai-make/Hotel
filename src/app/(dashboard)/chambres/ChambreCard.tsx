@@ -6,15 +6,9 @@ import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { ROOM_STATUS_COLORS } from "~/lib/constants";
+import { ROOM_STATUS_COLORS, TYPE_CHAMBRE_LABELS } from "~/lib/constants";
 import { formatMoney } from "~/lib/utils";
 import { api } from "~/trpc/react";
-
-const TYPE_LABELS: Record<string, string> = {
-	SIMPLE: "Simple",
-	DOUBLE: "Double",
-	SUITE: "Suite",
-};
 
 const STATUT_LABELS: Record<string, string> = {
 	LIBRE: "Libre",
@@ -50,13 +44,13 @@ export function ChambreCard({ chambre }: ChambreCardProps) {
 			<Link href={`/chambres/${chambre.id}`}>
 				<CardHeader className="flex-row items-center justify-between gap-2 pb-0">
 					<CardTitle className="text-xl">{chambre.numero}</CardTitle>
-					<Badge variant="outline" className={statutColor}>
+					<Badge className={statutColor} variant="outline">
 						{STATUT_LABELS[chambre.statut] ?? chambre.statut}
 					</Badge>
 				</CardHeader>
 				<CardContent className="space-y-2">
 					<p className="text-muted-foreground text-sm">
-						{TYPE_LABELS[chambre.type] ?? chambre.type}
+						{TYPE_CHAMBRE_LABELS[chambre.type] ?? chambre.type}
 					</p>
 					<p className="font-semibold">
 						{formatMoney(tarifNumber)}
@@ -69,8 +63,8 @@ export function ChambreCard({ chambre }: ChambreCardProps) {
 						<div className="flex flex-wrap gap-1 pt-1">
 							{chambre.caracteristiques.map((c) => (
 								<span
-									key={c}
 									className="rounded bg-muted px-1.5 py-0.5 text-muted-foreground text-xs"
+									key={c}
 								>
 									{c}
 								</span>
@@ -81,19 +75,17 @@ export function ChambreCard({ chambre }: ChambreCardProps) {
 			</Link>
 			<div className="px-6">
 				<Button
-					variant="outline"
-					size="sm"
 					className="w-full"
+					disabled={toggleStatut.isPending}
 					onClick={(e) => {
 						e.preventDefault();
 						toggleStatut.mutate({ id: chambre.id });
 					}}
-					disabled={toggleStatut.isPending}
+					size="sm"
+					variant="outline"
 				>
 					<ArrowRightLeft className="mr-2 h-3.5 w-3.5" />
-					{chambre.statut === "LIBRE"
-						? "Marquer Occupee"
-						: "Marquer Libre"}
+					{chambre.statut === "LIBRE" ? "Marquer Occupee" : "Marquer Libre"}
 				</Button>
 			</div>
 		</Card>

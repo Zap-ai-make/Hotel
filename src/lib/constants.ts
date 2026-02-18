@@ -42,3 +42,9 @@ export const RESERVATION_STATUS_COLORS: Record<string, string> = {
 	TERMINEE: "text-gray-600 bg-gray-50",
 	ANNULEE: "text-red-600 bg-red-50",
 };
+
+/** Labels francais des modes de paiement */
+export const MODE_PAIEMENT_LABELS: Record<string, string> = {
+	ESPECES: "Especes",
+	MOBILE_MONEY: "Mobile Money",
+};

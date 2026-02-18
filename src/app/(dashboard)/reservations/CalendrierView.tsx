@@ -29,11 +29,11 @@ export function CalendrierView() {
 		<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 			<div className="lg:col-span-2">
 				<CalendrierGrid
-					mois={mois}
 					annee={annee}
 					dateSelectionnee={dateSelectionnee}
-					onNaviguer={naviguerMois}
+					mois={mois}
 					onDateClick={setDateSelectionnee}
+					onNaviguer={naviguerMois}
 				/>
 			</div>
 			<div>

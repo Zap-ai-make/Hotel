@@ -30,15 +30,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
-import { ROOM_STATUS_COLORS } from "~/lib/constants";
+import { ROOM_STATUS_COLORS, TYPE_CHAMBRE_LABELS } from "~/lib/constants";
 import { formatMoney } from "~/lib/utils";
 import { api } from "~/trpc/react";
-
-const TYPE_LABELS: Record<string, string> = {
-	SIMPLE: "Simple",
-	DOUBLE: "Double",
-	SUITE: "Suite",
-};
 
 const STATUT_LABELS: Record<string, string> = {
 	LIBRE: "Libre",
@@ -176,19 +170,15 @@ export function ChambreManagement() {
 					<TableBody>
 						{chambres?.map((chambre) => (
 							<TableRow key={chambre.id}>
-								<TableCell className="font-medium">
-									{chambre.numero}
-								</TableCell>
+								<TableCell className="font-medium">{chambre.numero}</TableCell>
 								<TableCell>
-									{TYPE_LABELS[chambre.type] ?? chambre.type}
+									{TYPE_CHAMBRE_LABELS[chambre.type] ?? chambre.type}
 								</TableCell>
-								<TableCell>
-									{formatMoney(Number(chambre.tarif))}
-								</TableCell>
+								<TableCell>{formatMoney(Number(chambre.tarif))}</TableCell>
 								<TableCell>
 									<Badge
-										variant="outline"
 										className={ROOM_STATUS_COLORS[chambre.statut]}
+										variant="outline"
 									>
 										{STATUT_LABELS[chambre.statut] ?? chambre.statut}
 									</Badge>
@@ -199,21 +189,21 @@ export function ChambreManagement() {
 								<TableCell className="text-right">
 									<div className="flex justify-end gap-1">
 										<Button
-											variant="ghost"
-											size="sm"
 											onClick={() => openEdit(chambre)}
+											size="sm"
+											variant="ghost"
 										>
 											<Pencil className="h-4 w-4" />
 										</Button>
 										<Button
-											variant="ghost"
-											size="sm"
 											onClick={() =>
 												setDeleteConfirm({
 													id: chambre.id,
 													numero: chambre.numero,
 												})
 											}
+											size="sm"
+											variant="ghost"
 										>
 											<Trash2 className="h-4 w-4 text-destructive" />
 										</Button>
@@ -226,7 +216,7 @@ export function ChambreManagement() {
 			</div>
 
 			{/* Dialog Creer */}
-			<Dialog open={createOpen} onOpenChange={setCreateOpen}>
+			<Dialog onOpenChange={setCreateOpen} open={createOpen}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Nouvelle Chambre</DialogTitle>
@@ -236,23 +226,21 @@ export function ChambreManagement() {
 							<Label htmlFor="numero">Numero</Label>
 							<Input
 								id="numero"
-								value={form.numero}
-								onChange={(e) =>
-									setForm({ ...form, numero: e.target.value })
-								}
+								onChange={(e) => setForm({ ...form, numero: e.target.value })}
 								placeholder="ex: 105"
+								value={form.numero}
 							/>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="type">Type</Label>
 							<Select
-								value={form.type}
 								onValueChange={(v) =>
 									setForm({
 										...form,
 										type: v as ChambreFormData["type"],
 									})
 								}
+								value={form.type}
 							>
 								<SelectTrigger>
 									<SelectValue />
@@ -268,12 +256,10 @@ export function ChambreManagement() {
 							<Label htmlFor="tarif">Tarif / nuit (FCFA)</Label>
 							<Input
 								id="tarif"
+								onChange={(e) => setForm({ ...form, tarif: e.target.value })}
+								placeholder="ex: 25000"
 								type="number"
 								value={form.tarif}
-								onChange={(e) =>
-									setForm({ ...form, tarif: e.target.value })
-								}
-								placeholder="ex: 25000"
 							/>
 						</div>
 						<div className="space-y-2">
@@ -282,7 +268,6 @@ export function ChambreManagement() {
 							</Label>
 							<Input
 								id="carac"
-								value={form.caracteristiques}
 								onChange={(e) =>
 									setForm({
 										...form,
@@ -290,23 +275,17 @@ export function ChambreManagement() {
 									})
 								}
 								placeholder="Climatisation, TV, WiFi"
+								value={form.caracteristiques}
 							/>
 						</div>
 					</div>
 					<DialogFooter>
-						<Button
-							variant="outline"
-							onClick={() => setCreateOpen(false)}
-						>
+						<Button onClick={() => setCreateOpen(false)} variant="outline">
 							Annuler
 						</Button>
 						<Button
+							disabled={createMutation.isPending || !form.numero || !form.tarif}
 							onClick={handleCreate}
-							disabled={
-								createMutation.isPending ||
-								!form.numero ||
-								!form.tarif
-							}
 						>
 							{createMutation.isPending && (
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -319,8 +298,8 @@ export function ChambreManagement() {
 
 			{/* Dialog Modifier */}
 			<Dialog
-				open={!!editChambre}
 				onOpenChange={(open) => !open && setEditChambre(null)}
+				open={!!editChambre}
 			>
 				<DialogContent>
 					<DialogHeader>
@@ -331,22 +310,20 @@ export function ChambreManagement() {
 							<Label htmlFor="edit-numero">Numero</Label>
 							<Input
 								id="edit-numero"
+								onChange={(e) => setForm({ ...form, numero: e.target.value })}
 								value={form.numero}
-								onChange={(e) =>
-									setForm({ ...form, numero: e.target.value })
-								}
 							/>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="edit-type">Type</Label>
 							<Select
-								value={form.type}
 								onValueChange={(v) =>
 									setForm({
 										...form,
 										type: v as ChambreFormData["type"],
 									})
 								}
+								value={form.type}
 							>
 								<SelectTrigger>
 									<SelectValue />
@@ -362,11 +339,9 @@ export function ChambreManagement() {
 							<Label htmlFor="edit-tarif">Tarif / nuit (FCFA)</Label>
 							<Input
 								id="edit-tarif"
+								onChange={(e) => setForm({ ...form, tarif: e.target.value })}
 								type="number"
 								value={form.tarif}
-								onChange={(e) =>
-									setForm({ ...form, tarif: e.target.value })
-								}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -375,30 +350,23 @@ export function ChambreManagement() {
 							</Label>
 							<Input
 								id="edit-carac"
-								value={form.caracteristiques}
 								onChange={(e) =>
 									setForm({
 										...form,
 										caracteristiques: e.target.value,
 									})
 								}
+								value={form.caracteristiques}
 							/>
 						</div>
 					</div>
 					<DialogFooter>
-						<Button
-							variant="outline"
-							onClick={() => setEditChambre(null)}
-						>
+						<Button onClick={() => setEditChambre(null)} variant="outline">
 							Annuler
 						</Button>
 						<Button
+							disabled={updateMutation.isPending || !form.numero || !form.tarif}
 							onClick={handleUpdate}
-							disabled={
-								updateMutation.isPending ||
-								!form.numero ||
-								!form.tarif
-							}
 						>
 							{updateMutation.isPending && (
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -411,8 +379,8 @@ export function ChambreManagement() {
 
 			{/* Dialog Supprimer */}
 			<Dialog
-				open={!!deleteConfirm}
 				onOpenChange={(open) => !open && setDeleteConfirm(null)}
+				open={!!deleteConfirm}
 			>
 				<DialogContent>
 					<DialogHeader>
@@ -424,19 +392,15 @@ export function ChambreManagement() {
 						irreversible.
 					</p>
 					<DialogFooter>
-						<Button
-							variant="outline"
-							onClick={() => setDeleteConfirm(null)}
-						>
+						<Button onClick={() => setDeleteConfirm(null)} variant="outline">
 							Annuler
 						</Button>
 						<Button
-							variant="destructive"
-							onClick={() =>
-								deleteConfirm &&
-								deleteMutation.mutate({ id: deleteConfirm.id })
-							}
 							disabled={deleteMutation.isPending}
+							onClick={() =>
+								deleteConfirm && deleteMutation.mutate({ id: deleteConfirm.id })
+							}
+							variant="destructive"
 						>
 							{deleteMutation.isPending && (
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
