@@ -17,10 +17,23 @@ import {
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { logAction } from "./audit";
 
+const reservationListSelect = {
+	id: true,
+	clientNom: true,
+	clientTelephone: true,
+	dateArrivee: true,
+	dateDepart: true,
+	prixTotal: true,
+	statut: true,
+	notes: true,
+	chambreId: true,
+	chambre: { select: { numero: true, type: true } },
+} as const;
+
 export const reservationRouter = createTRPCRouter({
 	list: protectedProcedure.query(async ({ ctx }) => {
 		return ctx.db.reservation.findMany({
-			include: { chambre: true, createdBy: true },
+			select: reservationListSelect,
 			orderBy: { dateArrivee: "desc" },
 			take: 200,
 		});
@@ -240,7 +253,12 @@ export const reservationRouter = createTRPCRouter({
 						notes: input.notes ?? null,
 						createdById: ctx.session.user.id,
 					},
-					include: { chambre: true },
+					select: {
+						id: true,
+						clientNom: true,
+						chambreId: true,
+						chambre: { select: { numero: true } },
+					},
 				});
 
 				await logAction(tx, {
@@ -346,7 +364,12 @@ export const reservationRouter = createTRPCRouter({
 						prixTotal,
 						notes: input.notes ?? null,
 					},
-					include: { chambre: true, createdBy: true },
+					select: {
+						id: true,
+						clientNom: true,
+						chambreId: true,
+						chambre: { select: { numero: true, type: true } },
+					},
 				});
 
 				await logAction(tx, {
@@ -386,7 +409,11 @@ export const reservationRouter = createTRPCRouter({
 			const cancelled = await ctx.db.reservation.update({
 				where: { id: input.id },
 				data: { statut: "ANNULEE" },
-				include: { chambre: true, createdBy: true },
+				select: {
+					id: true,
+					clientNom: true,
+					chambre: { select: { numero: true } },
+				},
 			});
 
 			await logAction(ctx.db, {
@@ -431,7 +458,7 @@ export const reservationRouter = createTRPCRouter({
 
 			return ctx.db.reservation.findMany({
 				where,
-				include: { chambre: true, createdBy: true },
+				select: reservationListSelect,
 				orderBy: { dateArrivee: "desc" },
 				take: 50,
 			});

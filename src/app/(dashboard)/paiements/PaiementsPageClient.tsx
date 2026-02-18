@@ -17,6 +17,7 @@ import {
 	RESERVATION_STATUS_COLORS,
 	STATUT_RESERVATION_LABELS,
 } from "~/lib/constants";
+import { useDebounce } from "~/lib/hooks";
 import { formatDate, formatMoney } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { PaiementDetail } from "./PaiementDetail";
@@ -26,9 +27,10 @@ export function PaiementsPageClient() {
 		string | null
 	>(null);
 	const [query, setQuery] = useState("");
+	const debouncedQuery = useDebounce(query, 300);
 
 	const { data: reservations, isLoading } = api.reservation.search.useQuery({
-		query: query.trim() || undefined,
+		query: debouncedQuery.trim() || undefined,
 	});
 
 	// Filtrer seulement les reservations non annulees par defaut

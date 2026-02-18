@@ -11,7 +11,15 @@ export const paiementRouter = createTRPCRouter({
 		.query(async ({ ctx, input }) => {
 			return ctx.db.paiement.findMany({
 				where: { reservationId: input.reservationId },
-				include: { createdBy: true },
+				select: {
+					id: true,
+					montant: true,
+					mode: true,
+					estAcompte: true,
+					reference: true,
+					createdAt: true,
+					createdBy: { select: { nom: true } },
+				},
 				orderBy: { createdAt: "desc" },
 			});
 		}),
@@ -100,7 +108,15 @@ export const paiementRouter = createTRPCRouter({
 						reservationId: input.reservationId,
 						createdById: ctx.session.user.id,
 					},
-					include: { createdBy: true },
+					select: {
+						id: true,
+						montant: true,
+						mode: true,
+						estAcompte: true,
+						reference: true,
+						createdAt: true,
+						createdBy: { select: { nom: true } },
+					},
 				});
 
 				await logAction(tx, {

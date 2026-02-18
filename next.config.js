@@ -5,6 +5,10 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+	compress: true,
+	productionBrowserSourceMaps: false,
+	poweredByHeader: false,
+};
 
 export default config;

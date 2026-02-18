@@ -157,10 +157,16 @@ export const recuRouter = createTRPCRouter({
 				where: {
 					createdAt: { gte: dateDebut, lte: dateFin },
 				},
-				include: {
-					chambre: true,
-					paiements: true,
-					createdBy: true,
+				select: {
+					clientNom: true,
+					clientTelephone: true,
+					dateArrivee: true,
+					dateDepart: true,
+					prixTotal: true,
+					statut: true,
+					chambre: { select: { numero: true, type: true } },
+					paiements: { select: { montant: true, mode: true } },
+					createdBy: { select: { nom: true } },
 				},
 				orderBy: { dateArrivee: "asc" },
 			});

@@ -34,8 +34,16 @@ export const clientRouter = createTRPCRouter({
 				where: { id: input.id },
 				include: {
 					reservations: {
-						include: { chambre: true },
+						select: {
+							id: true,
+							dateArrivee: true,
+							dateDepart: true,
+							prixTotal: true,
+							statut: true,
+							chambre: { select: { numero: true, type: true } },
+						},
 						orderBy: { dateArrivee: "desc" },
+						take: 20,
 					},
 				},
 			});
